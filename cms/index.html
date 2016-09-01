@@ -5,20 +5,23 @@
 
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open Sans">
 		<link rel="stylesheet" type="text/css" href="index.css">
+		<script src="index.js"></script>
 	</head>
 	<body>
 		<h1>Content Management Server</h1>
+		<a href="index.html">Login</a>
+		<p> | </p>
+		<a href="register.html">Register</a>
+		<p> | </p>
+		<a href="posts.html">Edit Posts</a>
+		<p> | </p>
+		<a href="newpost.html">New Post</a>
+		<div>Status: <p id="status"></p></div>
+		<input id="logoutButton" type="button" value="Logout"/><br>
 		<hr>
-		<a href="cms/home">Home</a>
-		<br>
-		<a href="cms/register">Register</a>
-		<br>
-		<a href="cms/blog">Blog</a>
-		<br>
-		<a href="cms/post">New Post</a>
+		<input type="text" id="usernameField" placeholder="username"/><br>
+		<input type="password" id="passwordField" placeholder="password"/><br>
+		<input id="loginButton" type="button" value="Login"/><br>
 		<hr>
 	</body>
-
-	<script type="text/javascript" src="model.js"></script>
-	<script type="text/javascript" src="client.js"></script>
 </html>

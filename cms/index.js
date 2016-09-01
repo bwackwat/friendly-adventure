@@ -1,112 +1,102 @@
-var content = document.getElementById("content");
+window.onload = function(){
 
-var action;
+var localStorageLoginUsernameKey = "USERNAME_KEY";
+var localStorageLoginTokenKey = "TOKEN_KEY";
+var apiUrl = "https://" + window.location.hostname + "/api";
 
-function connected(){
-	goto("login.html");
+//ELEMENTS
+
+var status = document.getElementById("status");
+
+var username = document.getElementById("usernameField");
+var password = document.getElementById("passwordField");
+var email = document.getElementById("emailField");
+var firstName = document.getElementById("firstNameField");
+var firstName = document.getElementById("lastNameField");
+
+var logoutButton = document.getElementById("logoutButton");
+
+//API TOOLS
+
+function callAPI(route, data, callback){
+	var sendData = JSON.stringify(data);
+
+	var http = new XMLHttpRequest();
+	http.open("POST", apiUrl + route, true);
+	http.setRequestHeader("Content-type", "application/json");
+	http.onreadystatechange = function(){
+		if(http.responseText == ""){
+			//Bloody OPTIONS pre-flight...
+			return;
+		}
+		console.log("RECV: " + http.responseText);
+		var resjson = JSON.parse(http.responseText);
+		if(http.readyState == 4 && http.status == 200){
+			callback(resjson);
+		}else if(http.readyState == 3){
+			//Bogus OPTIONS response...
+			
+			//0: request not initialized
+			//1: server connection established
+			//2: request received
+			//3: processing request
+			//4: request finished and response is ready
+		}else{
+			//Invalid API usage...
+			alert("HTTP ERROR!");
+		}
+	}
+	http.send(sendData);
 }
 
-var question;
+function checkLogin(){
+	if(localStorage.getItem(localStorageLoginTokenKey) === null){
+		status.innerHTML = "Not logged in.";
+	
+		logoutButton.style.display = "none";
+	}else{
+		status.innerHTML = "Logged in as " + localStorage.getItem(localStorageLoginUsernameKey);
 
-function receivedPacket(e){
-	action = JSON.parse(e.data);
-	switch(action.type){
-		case model.UPDATE_VIEW:
-			content.innerHTML = action.data;
-			break;
-		case model.POST:
-			document.getElementById("result").innerHTML = action.id;
-			document.getElementById("title").value = action.title;
-			document.getElementById("blog").value = action.text;
-			break;
-		case model.RESULT:
-			document.getElementById("result").innerHTML = action.data;
-			break;
-		case "humanTest":
-			question = action.data;
-			setTimeout(function(){
-				document.getElementById("testquestion").innerHTML = question;
-			}, 100);
-			break;
-		default:
-			console.log("Unknown Action!");
-			console.log(action);
-			break;
+		logoutButton.style.display = "inline";
 	}
 }
 
-function connectionClosed(){
-	console.log("Your WebSocket connection dropped!");
+function login() {
+	callAPI("/login", {"username": username.value, "password": password.value}, function(response){
+		if(typeof(response.error) === 'undefined'){
+			localStorage.setItem(localStorageLoginUsernameKey, username.value);
+			localStorage.setItem(localStorageLoginTokenKey, response.result.token);
+		}else{
+			status.innerHTML = response.error;
+		}
+	});
 }
 
-function connectionError(){
-	console.log("WebSocket connection error!");
-	location.reload();
+function register() {
+	callAPI("/register", {"username": username.value, "password": password.value, "email": email.value, "first_name": firstName.value, "last_name": lastName.value}, function(response){
+		if(typeof(response.error) === 'undefined'){
+			username.value = "";
+			password.value = "";
+			email.value = "";
+			firstname.value = "";
+			lastname.value = "";
+			status.innerHTML = "You signed up successfully!";
+		}else{
+			status.innerHTML = response.error;
+		}
+	});
 }
 
-var ws = new WebSocket("wss://" + window.location.hostname + ":" + model.PORT + "/");
-ws.onopen = connected;
-ws.onmessage = receivedPacket;
-ws.onclose = connectionClosed;
-ws.onerror = connectionError;
-
-function authenticate(){
-	try{
-		ws.send(JSON.stringify({type: model.AUTHENTICATE,
-			username: document.getElementById("username").value,
-			password: document.getElementById("password").value}));
-	}catch(e){
-		location.reload();
-	}
+function logout() {
+	localStorage.removeItem(localStorageLoginTokenKey);
+	window.reload();
 }
 
-function register(){
-	try{
-		ws.send(JSON.stringify({type: model.REGISTER,
-			username: document.getElementById("username").value,
-			password: document.getElementById("password").value,
-			answer: document.getElementById("testanswer").value,
-			}));
-	}catch(e){
-		location.reload();
-	}
+checkLogin();
+
 }
 
-function goto(place){
-	try{
-		ws.send(JSON.stringify({type: model.GOTO,
-			place: place}));
-	}catch(e){
-		location.reload();
-	}
-}
 
-function edit(id){
-	try{
-		ws.send(JSON.stringify({type: model.EDIT_POST,
-			id: id}));
-	}catch(e){
-		location.reload();
-	}
-}
 
-function submitPost(){
-	try{
-		ws.send(JSON.stringify({type: model.POST,
-			title: document.getElementById("title").value,
-			text: document.getElementById("blog").value}));
-	}catch(e){
-		location.reload();
-	}
-}
 
-function savePost(){
-	try{
-		ws.send(JSON.stringify({type: model.SAVE_POST,
-			id: document.getElementById("result").innerHTML,
-			title: document.getElementById("title").value,
-			text: document.getElementById("blog").value}));
-	}catch(e){
-		location.reload();
-	}
-}
+

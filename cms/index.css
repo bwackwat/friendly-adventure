@@ -7,6 +7,7 @@ textarea, input {
 	height: 40px;
 }
 
+
 input[type="button"] {
 	border: 1px solid #CCC;
 	padding: 10px 25px 10px 25px;
@@ -21,22 +22,14 @@ textarea, input[type="text"], input[type="password"] {
 	border-radius: 4px;
 }
 
+a {
+	display: inline;
+}
+
 p {
+	display: inline;
 	margin: 0;
 	font-size: 15;
-}
-
-#parent-content {
-	text-align: center;
-}
-
-#content {
-	display: inline-block;
-	text-align: justify;
-}
-
-#form {
-	text-align: center;
 }
 
 #title {

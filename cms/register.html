@@ -1,14 +1,30 @@
-<div id="form">
-	<h2 id="register.html">Register</h2>
-	<h4 id="result">I hope you're human.</h4>
-	<input id="username" type="text" placeholder="username"/>
-	<br>
-	<input id="password" type="password" placeholder="password"/>
-	<br>
-	<table><tr><td>Test: </td><td id="testquestion"></td></tr></table>
-	<input id="testanswer" type="text" placeholder="answer"/>
-	<br>
-	<input id="register" type="button" value="Register" onclick="register()"/>
-	<br>
-	<input id="back" type="button" value="Back" onclick="goto('login.html');"/>
-</div>
+<html>
+	<head>
+		<title>CMS</title>
+		<link rel='icon' type='image/x-icon' href='favicon.png'/>
+
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open Sans">
+		<link rel="stylesheet" type="text/css" href="index.css">
+		<script src="index.js"></script>
+	</head>
+	<body>
+		<h1>Content Management Server</h1>
+		<a href="index.html">Login</a>
+		<p> | </p>
+		<a href="register.html">Register</a>
+		<p> | </p>
+		<a href="posts.html">Edit Posts</a>
+		<p> | </p>
+		<a href="newpost.html">New Post</a>
+		<div>Status: <p id="status"></p></div>
+		<input id="logoutButton" type="button" value="Logout"/><br>
+		<hr>
+		<input type="text" id="usernameField" placeholder="username"/><br>
+		<input type="password" id="passwordField" placeholder="password"/><br>
+		<input type="email" id="emailField" placeholder="email"/><br>
+		<input type="text" id="firstNameField" placeholder="first name"/><br>
+		<input type="text" id="lastNameField" placeholder="last name"/><br>
+		<input id="registerButton" type="button" value="Register" onclick="register();"/><br>
+		<hr>
+	</body>
+</html>
