@@ -1,10 +1,9 @@
-window.onload = function(){
+
+window.onload = function() {
 
 var localStorageLoginUsernameKey = "USERNAME_KEY";
 var localStorageLoginTokenKey = "TOKEN_KEY";
 var apiUrl = "https://" + window.location.hostname + "/api";
-
-//ELEMENTS
 
 var status = document.getElementById("status");
 
@@ -12,11 +11,11 @@ var username = document.getElementById("usernameField");
 var password = document.getElementById("passwordField");
 var email = document.getElementById("emailField");
 var firstName = document.getElementById("firstNameField");
-var firstName = document.getElementById("lastNameField");
+var lastName = document.getElementById("lastNameField");
 
+var loginButton = document.getElementById("loginButton");
+var registerButton = document.getElementById("registerButton");
 var logoutButton = document.getElementById("logoutButton");
-
-//API TOOLS
 
 function callAPI(route, data, callback){
 	var sendData = JSON.stringify(data);
@@ -25,14 +24,17 @@ function callAPI(route, data, callback){
 	http.open("POST", apiUrl + route, true);
 	http.setRequestHeader("Content-type", "application/json");
 	http.onreadystatechange = function(){
-		if(http.responseText == ""){
+		if(http.responseText === ""){
 			//Bloody OPTIONS pre-flight...
-			return;
+			//return;
 		}
 		console.log("RECV: " + http.responseText);
-		var resjson = JSON.parse(http.responseText);
-		if(http.readyState == 4 && http.status == 200){
-			callback(resjson);
+		if(http.readyState == 4){
+			if(http.status == 200){
+				callback(JSON.parse(http.responseText));
+			}else{
+				callback({"error":"Bad response from server."})
+			}
 		}else if(http.readyState == 3){
 			//Bogus OPTIONS response...
 			
@@ -41,11 +43,17 @@ function callAPI(route, data, callback){
 			//2: request received
 			//3: processing request
 			//4: request finished and response is ready
+		}else if(http.readyState == 2){
+			callback({"error":"Could not receive data."})
+		}else if(http.readyState == 1){
+			callback({"error":"Could not establish connection."})
+		}else if(http.readyState == 0){
+			callback({"error":"Did not start connection."})
 		}else{
 			//Invalid API usage...
 			alert("HTTP ERROR!");
 		}
-	}
+	};
 	http.send(sendData);
 }
 
@@ -61,42 +69,45 @@ function checkLogin(){
 	}
 }
 
-function login() {
-	callAPI("/login", {"username": username.value, "password": password.value}, function(response){
-		if(typeof(response.error) === 'undefined'){
-			localStorage.setItem(localStorageLoginUsernameKey, username.value);
-			localStorage.setItem(localStorageLoginTokenKey, response.result.token);
-		}else{
-			status.innerHTML = response.error;
-		}
-	});
+if(loginButton !== null && loginButton !== "undefined"){
+	loginButton.onclick = function() {
+		callAPI("/login", {"username": username.value, "password": password.value}, function(response){
+			if(typeof(response.error) === 'undefined'){
+				localStorage.setItem(localStorageLoginUsernameKey, username.value);
+				localStorage.setItem(localStorageLoginTokenKey, response.result.token);
+			}else{
+				status.innerHTML = response.error;
+			}
+		});
+	};
 }
 
-function register() {
-	callAPI("/register", {"username": username.value, "password": password.value, "email": email.value, "first_name": firstName.value, "last_name": lastName.value}, function(response){
-		if(typeof(response.error) === 'undefined'){
-			username.value = "";
-			password.value = "";
-			email.value = "";
-			firstname.value = "";
-			lastname.value = "";
-			status.innerHTML = "You signed up successfully!";
-		}else{
-			status.innerHTML = response.error;
-		}
-	});
+if(registerButton !== null && registerButton !== "undefined"){
+	registerButton.onclick = function() {
+		callAPI("/register", {"username": username.value, "password": password.value, "email": email.value, "first_name": firstName.value, "last_name": lastName.value}, function(response){
+			if(typeof(response.error) === 'undefined'){
+				username.value = "";
+				password.value = "";
+				email.value = "";
+				firstName.value = "";
+				lastName.value = "";
+				status.innerHTML = "You signed up successfully!";
+			}else{
+				status.innerHTML = response.error;
+			}
+		});
+	};
 }
 
-function logout() {
-	localStorage.removeItem(localStorageLoginTokenKey);
-	window.reload();
+if(logoutButton !== null && logoutButton !== "undefined"){
+	logoutButton.onclick = function() {
+		localStorage.removeItem(localStorageLoginTokenKey);
+		window.reload();
+	};
 }
 
 checkLogin();
 
 }
-
-
-
 
 
