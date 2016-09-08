@@ -1,11 +1,25 @@
-<h2 id="newpost.html">New Post</h2>
-<h4 id="result"></h4>
-<div>
-	<input id="title" type="text" placeholder="Post Title"/>
-	<br>
-	<textarea id="blog" placeholder="Post Text" columns="100"></textarea>
-	<br>
-	<input id="submitPost" type="button" value="Submit Post" onclick="submitPost()"/>
-	<br>
-	<input id="back" type="button" value="Back" onclick="goto('admin.html');"/>
-</div>
+<html>
+	<head>
+		<title>CMS</title>
+		<link rel='icon' type='image/x-icon' href='favicon.png'/>
+		<script src="index.js"></script>
+	</head>
+	<body>
+		<h1>Content Management Server</h1>
+		<a href="index.html">Login</a>
+		<a href="register.html">Register</a>
+		<a href="posts.html">Edit Posts</a>
+		<a href="newpost.html">New Post</a>
+		<br>
+		<div id="status"></div>
+		<input id="logoutButton" type="button" value="Logout"/><br>
+		<hr>
+		<div>Blog Title:</div>
+		<input type="text" id="blogTitleField"/><br>
+		<div>Blog Content:</div><textarea id="blogContentField" columns="200" rows="
+20"></textarea>
+		<br>
+		<input id="submitPostButton" type="button" value="Submit Post"/><br>
+		<hr>
+	</body>
+</html>

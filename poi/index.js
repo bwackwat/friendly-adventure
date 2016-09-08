@@ -194,7 +194,7 @@ document.getElementById("logout").onclick = function() {
 //SIGNUP MODAL SCRIPT
 
 document.getElementById("signupButton").onclick = function() {
-	callAPI("/signup", {"first_name": "poif", "last_name": "poil", "username": signupUsername.value, "email": signupEmail.value, "password": signupPassword.value}, function(response){
+	callAPI("/user/new", {"first_name": "poif", "last_name": "poil", "username": signupUsername.value, "email": signupEmail.value, "password": signupPassword.value}, function(response){
 		if(typeof(response.error) === 'undefined'){
 			signup.close();
 			loginResult.innerHTML = "";

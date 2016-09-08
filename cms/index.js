@@ -1,4 +1,3 @@
-
 window.onload = function() {
 
 var localStorageLoginUsernameKey = "USERNAME_KEY";
@@ -12,9 +11,15 @@ var password = document.getElementById("passwordField");
 var email = document.getElementById("emailField");
 var firstName = document.getElementById("firstNameField");
 var lastName = document.getElementById("lastNameField");
+var blogTitle = document.getElementById("blogTitleField");
+var blogContent = document.getElementById("blogContentField");
+var posts = document.getElementById("posts");
+var postEdit = document.getElementById("postEdit");
 
 var loginButton = document.getElementById("loginButton");
 var registerButton = document.getElementById("registerButton");
+var submitPostButton = document.getElementById("submitPostButton");
+var savePostButton = document.getElementById("savePostButton");
 var logoutButton = document.getElementById("logoutButton");
 
 function callAPI(route, data, callback){
@@ -26,7 +31,7 @@ function callAPI(route, data, callback){
 	http.onreadystatechange = function(){
 		if(http.responseText === ""){
 			//Bloody OPTIONS pre-flight...
-			//return;
+			return;
 		}
 		console.log("RECV: " + http.responseText);
 		if(http.readyState == 4){
@@ -75,6 +80,7 @@ if(loginButton !== null && loginButton !== "undefined"){
 			if(typeof(response.error) === 'undefined'){
 				localStorage.setItem(localStorageLoginUsernameKey, username.value);
 				localStorage.setItem(localStorageLoginTokenKey, response.result.token);
+				location.reload();
 			}else{
 				status.innerHTML = response.error;
 			}
@@ -84,7 +90,7 @@ if(loginButton !== null && loginButton !== "undefined"){
 
 if(registerButton !== null && registerButton !== "undefined"){
 	registerButton.onclick = function() {
-		callAPI("/register", {"username": username.value, "password": password.value, "email": email.value, "first_name": firstName.value, "last_name": lastName.value}, function(response){
+		callAPI("/user/new", {"username": username.value, "password": password.value, "email": email.value, "first_name": firstName.value, "last_name": lastName.value}, function(response){
 			if(typeof(response.error) === 'undefined'){
 				username.value = "";
 				password.value = "";
@@ -102,7 +108,45 @@ if(registerButton !== null && registerButton !== "undefined"){
 if(logoutButton !== null && logoutButton !== "undefined"){
 	logoutButton.onclick = function() {
 		localStorage.removeItem(localStorageLoginTokenKey);
-		window.reload();
+		location.reload();
+	};
+}
+
+var blog = null;
+selectPost = function(index){
+	blogTitle.value = blog[index].title;
+	blogContent.value = blog[index].content;
+	posts.style.display = "none";
+	postEdit.style.display = "inline";
+}
+
+if(posts !== null && posts !== "undefined"){
+	postEdit.style.display = "none";
+	callAPI("/user/blog", {"token": localStorage.getItem(localStorageLoginTokenKey)}, function(response){
+		if(typeof(response.error) === 'undefined'){
+			blog = response.result;
+			var newhtml = "";
+			for(var i = 0, len = response.result.length; i < len; i++){
+				newhtml += "<a href='#' onclick='selectPost(" + i + ");'>" + response.result[i].title + "</a><br>";
+			}
+			posts.innerHTML = newhtml;
+		}else{
+			status.innerHTML = response.error;
+		}
+	});
+}
+
+if(submitPostButton !== null && submitPostButton !== "undefined"){
+	submitPostButton.onclick = function() {
+		callAPI("/blog/new", {"token": localStorage.getItem(localStorageLoginTokenKey), "title": blogTitle.value, "content": blogContent.value}, function(response){
+			if(typeof(response.error) === 'undefined'){
+				blogTitle.value = "";
+				blogContent.value = "";
+				status.innerHTML = "Blog post successfully submitted!";
+			}else{
+				status.innerHTML = response.error;
+			}
+		});
 	};
 }
 
