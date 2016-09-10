@@ -5,6 +5,7 @@
 
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open Sans">
 		<link rel="stylesheet" type="text/css" href="index.css">
+		<script src="index.js"></script>
 	</head>
 	<body>
 		<div id="banner">
@@ -19,25 +20,4 @@
 		</div>
 		<div id="content"></div>
 	</body>
-	<script type="text/javascript">
-	function setContent(file)
-	{
-		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.open("GET", file, true);
-		xmlHttp.onload = function(e){
-			if(xmlHttp.readyState === 4){
-				if(xmlHttp.status === 200){
-					document.getElementById("content").innerHTML = xmlHttp.responseText;
-				}else{
-					console.error(xmlHttp.statusText);
-				}
-			}
-		};
-		xmlHttp.onerror = function(e){
-			console.error(xmlHttp.statusText);
-		}
-		xmlHttp.send(null);
-	}
-	setContent("posts.html");
-	</script>
 </html>

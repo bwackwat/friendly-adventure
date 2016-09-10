@@ -137,7 +137,7 @@ function authSuccess(){
 }
 
 document.getElementById("loginButton").onclick = function() {
-	callAPI("/login", {"login": username.value, "password": password.value}, function(response){
+	callAPI("/login", {"username": username.value, "password": password.value}, function(response){
 		if(typeof(response.error) === 'undefined'){
 			localStorage.setItem(localStorageLoginUsernameKey, username.value);
 			localStorage.setItem(localStorageLoginTokenKey, response.result.token);
