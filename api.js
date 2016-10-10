@@ -6,23 +6,6 @@ var apiUrl = "https://" + window.location.hostname + "/api";
 
 var status = document.getElementById("status");
 
-var username = document.getElementById("usernameField");
-var password = document.getElementById("passwordField");
-var email = document.getElementById("emailField");
-var firstName = document.getElementById("firstNameField");
-var lastName = document.getElementById("lastNameField");
-
-var blogTitle = document.getElementById("blogTitleField");
-var blogContent = document.getElementById("blogContentField");
-var posts = document.getElementById("posts");
-var postEdit = document.getElementById("postEdit");
-
-var loginButton = document.getElementById("loginButton");
-var registerButton = document.getElementById("registerButton");
-var submitPostButton = document.getElementById("submitPostButton");
-var savePostButton = document.getElementById("savePostButton");
-var logoutButton = document.getElementById("logoutButton");
-
 function callAPI(route, data, callback){
 	var sendData = JSON.stringify(data);
 
@@ -62,6 +45,50 @@ function callAPI(route, data, callback){
 	};
 	http.send(sendData);
 }
+
+////////////////////////////////////////////////////////////////
+// BLOG
+////////////////////////////////////////////////////////////////
+
+var content = document.getElementById("content");
+if(content !== null && content !== "undefined"){
+	callAPI("/blog", {"username": "bwackwat"}, function(response){
+		if(typeof(response.error) === 'undefined'){
+			var newhtml = "<div id='posts'>";
+			for(var i = 0, len = response.result.length; i < len; i++){
+				newhtml += "<div id='post'><div id='posttitle'>" + response.result[i].title;
+				newhtml += "</div><div id='postdate'>" + response.result[i].created_on;
+				newhtml += "</div><br><div id='posttext'>" + response.result[i].content;
+				newhtml += "</div></div><hr>";
+			}
+			newhtml += "</div>";
+			content.innerHTML = newhtml;
+		}else{
+			content.innerHTML = response.error;
+		}
+	});
+}
+
+////////////////////////////////////////////////////////////////
+// CMS
+////////////////////////////////////////////////////////////////
+
+var username = document.getElementById("usernameField");
+var password = document.getElementById("passwordField");
+var email = document.getElementById("emailField");
+var firstName = document.getElementById("firstNameField");
+var lastName = document.getElementById("lastNameField");
+
+var blogTitle = document.getElementById("blogTitleField");
+var blogContent = document.getElementById("blogContentField");
+var posts = document.getElementById("posts");
+var postEdit = document.getElementById("postEdit");
+
+var loginButton = document.getElementById("loginButton");
+var registerButton = document.getElementById("registerButton");
+var submitPostButton = document.getElementById("submitPostButton");
+var savePostButton = document.getElementById("savePostButton");
+var logoutButton = document.getElementById("logoutButton");
 
 function checkLogin(){
 	if(localStorage.getItem(localStorageLoginTokenKey) !== null){
