@@ -197,7 +197,9 @@ if(savePostButton !== null && savePostButton !== "undefined"){
 	};
 }
 
-checkLogin();
+if(status !== null && status !== "undefined"){
+	checkLogin();
+}
 
 }
 
