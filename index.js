@@ -2,15 +2,16 @@ window.onload = function() {
 
 var localStorageLoginUsernameKey = "USERNAME_KEY";
 var localStorageLoginTokenKey = "TOKEN_KEY";
+var localStorageLoginIdKey = "ID_KEY";
 var apiUrl = "https://" + window.location.hostname + "/api";
 
 var status = document.getElementById("status");
 
-function callAPI(route, data, callback){
+function callAPI(method, route, data, callback){
 	var sendData = JSON.stringify(data);
 
 	var http = new XMLHttpRequest();
-	http.open("POST", apiUrl + route, true);
+	http.open(method, apiUrl + route, true);
 	http.setRequestHeader("Content-type", "application/json");
 	http.onreadystatechange = function(){
 		if(http.responseText === ""){
@@ -52,13 +53,13 @@ function callAPI(route, data, callback){
 
 var content = document.getElementById("content");
 if(content !== null && content !== "undefined"){
-	callAPI("/blog", {"username": "bwackwat"}, function(response){
+	callAPI("GET", "/blog?username=bwackwat", {}, function(response){
 		if(typeof(response.error) === 'undefined'){
 			var newhtml = "<div id='posts'>";
-			for(var i = 0, len = response.result.length; i < len; i++){
-				newhtml += "<div id='post'><div id='posttitle'>" + response.result[i].title;
-				newhtml += "</div><div id='postdate'>" + response.result[i].created_on;
-				newhtml += "</div><br><div id='posttext'>" + response.result[i].content;
+			for(var i = 0, len = response.length; i < len; i++){
+				newhtml += "<div id='post'><div id='posttitle'>" + response[i].title;
+				newhtml += "</div><div id='postdate'>" + response[i].created_on;
+				newhtml += "</div><br><div id='posttext'>" + response[i].content;
 				newhtml += "</div></div><hr>";
 			}
 			newhtml += "</div>";
@@ -91,29 +92,25 @@ var savePostButton = document.getElementById("savePostButton");
 var logoutButton = document.getElementById("logoutButton");
 
 function checkLogin(){
-	if(localStorage.getItem(localStorageLoginTokenKey) !== null){
-		callAPI("/token", {"token": localStorage.getItem(localStorageLoginTokenKey)}, function(response){
-			if(typeof(response.error) === 'undefined'){
-				status.innerHTML = "Logged in as " + localStorage.getItem(localStorageLoginUsernameKey);
-				logoutButton.style.display = "inline";
-			}else{
-				localStorage.removeItem(localStorageLoginTokenKey);
-				status.innerHTML = response.error;
-			}
-		});
+	if(localStorage.getItem(localStorageLoginTokenKey) !== null &&
+	localStorage.getItem(localStorageLoginTokenKey) !== "undefined"){
+		status.innerHTML = "Logged in as " + localStorage.getItem(localStorageLoginUsernameKey);
+		logoutButton.style.display = "inline";
 	}else{
 		status.innerHTML = "Not logged in.";
+		logoutButton.style.display = "none";
 	}
-	logoutButton.style.display = "none";
 }
 
 if(loginButton !== null && loginButton !== "undefined"){
 	loginButton.onclick = function() {
-		callAPI("/login", {"username": username.value, "password": password.value}, function(response){
+		callAPI("POST", "/login", {"username": username.value, "password": password.value}, function(response){
 			if(typeof(response.error) === 'undefined'){
+				status.innerHTML = response.result;
 				localStorage.setItem(localStorageLoginUsernameKey, username.value);
-				localStorage.setItem(localStorageLoginTokenKey, response.result.token);
-				location.reload();
+				localStorage.setItem(localStorageLoginTokenKey, response.token);
+				localStorage.setItem(localStorageLoginIdKey, response.id);
+				checkLogin();
 			}else{
 				status.innerHTML = response.error;
 			}
@@ -123,7 +120,7 @@ if(loginButton !== null && loginButton !== "undefined"){
 
 if(registerButton !== null && registerButton !== "undefined"){
 	registerButton.onclick = function() {
-		callAPI("/user/new", {"username": username.value, "password": password.value, "email": email.value, "first_name": firstName.value, "last_name": lastName.value}, function(response){
+		callAPI("POST", "/user", {"values": [username.value, password.value, email.value, firstName.value, lastName.value]}, function(response){
 			if(typeof(response.error) === 'undefined'){
 				username.value = "";
 				password.value = "";
@@ -140,8 +137,10 @@ if(registerButton !== null && registerButton !== "undefined"){
 
 if(logoutButton !== null && logoutButton !== "undefined"){
 	logoutButton.onclick = function() {
+		localStorage.removeItem(localStorageLoginUsernameKey);
 		localStorage.removeItem(localStorageLoginTokenKey);
-		location.reload();
+		localStorage.removeItem(localStorageLoginIdKey);
+		checkLogin();
 	};
 }
 
@@ -157,12 +156,12 @@ selectPost = function(index){
 
 if(posts !== null && posts !== "undefined"){
 	postEdit.style.display = "none";
-	callAPI("/user/blog", {"token": localStorage.getItem(localStorageLoginTokenKey)}, function(response){
+	callAPI("GET", "/blog?username=" + localStorage.getItem(localStorageLoginUsernameKey), {}, function(response){
 		if(typeof(response.error) === 'undefined'){
-			blog = response.result;
+			blog = response;
 			var newhtml = "";
-			for(var i = 0, len = response.result.length; i < len; i++){
-				newhtml += "<a href='#' onclick='selectPost(" + i + ");'>" + response.result[i].title + "</a><br>";
+			for(var i = 0, len = response.length; i < len; i++){
+				newhtml += "<a href='#' onclick='selectPost(" + i + ");'>" + response[i].title + "</a><br>";
 			}
 			posts.innerHTML = newhtml;
 		}else{
@@ -173,7 +172,7 @@ if(posts !== null && posts !== "undefined"){
 
 if(submitPostButton !== null && submitPostButton !== "undefined"){
 	submitPostButton.onclick = function() {
-		callAPI("/blog/new", {"token": localStorage.getItem(localStorageLoginTokenKey), "title": blogTitle.value, "content": blogContent.value}, function(response){
+		callAPI("POST", "/blog", {"token": localStorage.getItem(localStorageLoginTokenKey), "values": [blogTitle.value, blogContent.value]}, function(response){
 			if(typeof(response.error) === 'undefined'){
 				blogTitle.value = "";
 				blogContent.value = "";
@@ -187,7 +186,7 @@ if(submitPostButton !== null && submitPostButton !== "undefined"){
 
 if(savePostButton !== null && savePostButton !== "undefined"){
 	savePostButton.onclick = function() {
-		callAPI("/blog/put", {"token": localStorage.getItem(localStorageLoginTokenKey), "id": blogId, "title": blogTitle.value, "content": blogContent.value}, function(response){
+		callAPI("PUT", "/blog", {"token": localStorage.getItem(localStorageLoginTokenKey), "id": blogId, "values": {"title": blogTitle.value, "content": blogContent.value}}, function(response){
 			if(typeof(response.error) === 'undefined'){
 				status.innerHTML = "Blog post successfully saved!";
 			}else{
